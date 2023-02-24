@@ -1,0 +1,121 @@
+openapi: 3.0.0
+info:
+  title: Coffee Shop Ordering System API
+  description: This API allows customers to submit, modify, and cancel orders for a coffee shop.
+  version: 1.0.0
+servers:
+  - url: http://api.coffeeshop.com
+paths:
+  /orders:
+    get:
+      summary: Get all orders
+      description: Retrieves a list of all orders submitted to the coffee shop.
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+          description: Filter orders by status (e.g. "pending", "fulfilled", "cancelled").
+      responses:
+        '200':
+          description: Returns a list of all orders.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        '404':
+          description: No orders were found.
+
+    post:
+      summary: Submit a new order
+      description: Allows customers to submit a new order to the coffee shop.
+      requestBody:
+        description: Details of the new order.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewOrder'
+      responses:
+        '201':
+          description: The order was successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          description: The request was invalid or missing required data.
+        '500':
+          description: There was an internal server error.
+
+  /orders/{orderId}:
+    get:
+      summary: Get an order by ID
+      description: Retrieves details of a specific order by its ID.
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema:
+            type: integer
+          description: The ID of the order to retrieve.
+      responses:
+        '200':
+          description: Returns details of the specified order.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '404':
+          description: The order with the specified ID was not found.
+
+    put:
+      summary: Update an existing order
+      description: Allows customers to modify an existing order as long as it has not yet been fulfilled.
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema:
+            type: integer
+          description: The ID of the order to modify.
+      requestBody:
+        description: Details of the updated order.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrder'
+      responses:
+        '200':
+          description: The order was successfully updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          description: The request was invalid or missing required data.
+        '404':
+          description: The order with the specified ID was not found.
+        '409':
+          description: The order has already been fulfilled and cannot be modified.
+
+    delete:
+      summary: Cancel an existing order
+      description: Allows customers to cancel an existing order as long as it has not yet been fulfilled.
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema:
+            type: integer
+          description: The ID of the order to cancel.
+      responses:
+        '204':
+          description: The order was successfully cancelled.
+        '404':
+          description: The order with the specified ID was not found.
+        '409':
+          description: The order has already been fulfilled and cannot be cancelled.
